@@ -3,3 +3,4 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 cd `dirname $0`
 ./merchant/start.sh
+./psp/start.sh

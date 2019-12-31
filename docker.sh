@@ -1,7 +1,7 @@
-docker stop 5d16
+docker stop cb8c
 
-docker cp ./ 5d16:/root/microservices-docker
+docker cp ./ cb8c:/root/microservices-docker
 
-docker start 5d16
+docker start cb8c
 
-docker exec -d 5d16 sh /root/microservices-docker/start.sh
+docker exec -d cb8c sh /root/microservices-docker/start.sh
