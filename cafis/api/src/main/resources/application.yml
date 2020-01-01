@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: api
+  server:
+    port: 8082
