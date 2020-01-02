@@ -1,5 +1,6 @@
 package api;
 
+import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -23,10 +24,13 @@ import java.util.List;
 public class Api {
 
     @Inject
-    @Client("http://localhost:8081/psp")
+    @Client("http://localhost:${psp.port:`8081`}/psp")
     HttpClient psp;
 
     private RedissonClient client;
+
+    @Value("${merchant.code:'M001'}")
+    private String merchantCode;
 
     public Api() {
         Config config = new Config();
@@ -36,7 +40,7 @@ public class Api {
 
     @Get("sales")
     public List<String> sales(){
-        RList<Sales> list = client.getList("merchant");
+        RList<Sales> list = client.getList(merchantCode);
         List<String> li = new ArrayList<>();
         for (Sales sales: list) {
             li.add(sales.toString());
@@ -44,13 +48,20 @@ public class Api {
         return li;
     }
 
+    @Get("clear")
+    public String clear(){
+        client.getList(merchantCode).clear();
+        return "clear";
+    }
+
     @Post("auth")
     public HttpResponse<AuthResponse> auth(@Body AuthRequest ar) {
         try{
+            ar.setMerchantCode(merchantCode);
             HttpResponse<AuthResponse> res = psp.toBlocking().exchange(HttpRequest.POST("/auth", ar),
                     Argument.of(AuthResponse.class), Argument.of(AuthResponse.class));
 
-            RList<Sales> list = client.getList("merchant");
+            RList<Sales> list = client.getList(merchantCode);
             list.add(new Sales(ar, res.getBody().get()));
 
             return HttpResponse.created(res.body());

@@ -20,6 +20,8 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller("/cafis")
 public class Api {
@@ -30,6 +32,23 @@ public class Api {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         client = Redisson.create(config);
+    }
+
+    @Get("sales")
+    public List<String> sales(){
+        RList<Sales> list = client.getList("cafis");
+        List<String> li = new ArrayList<>();
+        for (Sales sales: list) {
+            li.add(sales.toString());
+        }
+        return li;
+    }
+
+    @Get("clear")
+    public String clear(){
+        client.getList("cafis").clear();
+        client.getAtomicLong("authNum").set(0);
+        return "clear";
     }
 
     @Post("auth")

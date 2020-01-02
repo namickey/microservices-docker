@@ -17,19 +17,37 @@ import java.util.List;
 public class DashBoard {
 
     @Inject
-    @Client("http://localhost:8080/merchant")
+    @Client("http://localhost:${micronaut.server.port:`8080`}/merchant")
     HttpClient merchant;
 
     @Inject
-    @Client("http://localhost:8081/psp")
+    @Client("http://localhost:${psp.port:`8081`}/psp")
     HttpClient psp;
 
     @Inject
     @Client("http://localhost:8082/cafis")
     HttpClient cafis;
 
+    @Get(value="/a", produces = MediaType.TEXT_HTML)
+    public String ok() {
+        return req(100);
+    }
+
+    @Get(value="/b", produces = MediaType.TEXT_HTML)
+    public String ng() {
+        return req(300);
+    }
+
+    @Get(value="/c", produces = MediaType.TEXT_HTML)
+    public String clear() {
+        merchant.toBlocking().retrieve("clear");
+        psp.toBlocking().retrieve("clear");
+        cafis.toBlocking().retrieve("clear");
+        return "clear";
+    }
+
     private String dash(String res){
-        return addHtml(res + getList(merchant, "sales"));
+        return addHtml(res + getList(merchant, "sales") + getList(psp, "sales"));
     }
 
     private String addHtml(String str){
@@ -54,17 +72,10 @@ public class DashBoard {
                     Argument.of(AuthResponse.class), Argument.of(AuthResponse.class));
             return dash(res.body().toString());
         }catch(HttpClientResponseException e){
+            e.printStackTrace();
             return dash(e.getResponse().getBody(AuthResponse.class).get().getErrorCode());
         }
     }
 
-    @Get(value="/a", produces = MediaType.TEXT_HTML)
-    public String ok() {
-        return req(100);
-    }
 
-    @Get(value="/b", produces = MediaType.TEXT_HTML)
-    public String ng() {
-        return req(300);
-    }
 }

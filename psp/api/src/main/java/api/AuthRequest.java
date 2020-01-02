@@ -10,5 +10,5 @@ public class AuthRequest {
     private LocalDateTime time;
     private int price;
     private String merchantCode;
-    private String companyCode = "P001";
+    private String companyCode;
 }
