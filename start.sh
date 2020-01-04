@@ -6,6 +6,8 @@ export PATH=$PATH:$JAVA_HOME/bin
 cd `dirname $0`
 ./redisstart.sh
 ./mosquittostart.sh
+./card/authorize/start.sh
 ./cafis/start.sh
 ./psp/start.sh
 ./merchant/start.sh
+./dashboard/start.sh

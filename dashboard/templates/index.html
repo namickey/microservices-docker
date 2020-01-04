@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>index</title>
+  </head>
+  <body>
+    <clear></clear>
+    <micro port="8080" merchantcode="M001"></micro>
+    <micro port="8084" merchantcode="M002"></micro>
+    <micro port="8085" merchantcode="M003"></micro>
+    <script type="riot/tag">
+      <micro>
+        <h3>加盟店コード:{merchantcode}</h3>
+        <p>
+          <button onclick="{buy.bind(this, '100')}">buy:100</button>
+          <button onclick="{buy.bind(this, '300')}">buy:300</button>
+          <button id="info{port}" onclick="{getInfo}">show data port:{port}</button>
+        </p>
+        <p>{resStatus}</p>
+        <ul>
+          <li each={item in items}>{item}</li>
+        </ur>
+        var self = this
+        self.items = []
+        self.resStatus = ''
+        self.port = opts.port
+        self.merchantcode = opts.merchantcode
+        getInfo(event){
+          event.preventDefault()
+          fetch('http://localhost:' + self.port + '/dashboard/sales')
+          .then(function(response){
+            return response.json()
+          })
+          .then(function(json){
+            self.update({items:json})
+          })
+        }
+        buy(price, event){
+          console.log('http://localhost:' + self.port + '/dashboard/buy?price=' + price)
+          fetch('http://localhost:' + self.port + '/dashboard/buy?price=' + price)
+          .then(function(response){
+            console.log(response)
+            if(response.status >= 300){
+              self.update({resStatus:response.status})
+            }else{
+              self.update({resStatus:''})
+            }
+            fetch('http://localhost:' + self.port + '/dashboard/sales')
+            .then(function(response){
+              return response.json()
+            })
+            .then(function(json){
+              self.update({items:json})
+            })
+          })
+        }
+      </micro>
+      <clear>
+        <button onclick="{clear}">clear</button>
+        clear(event){
+          fetch('http://localhost:8080/dashboard/clear')
+          .then(function(response){
+            fetch('http://localhost:8084/dashboard/clear')
+            .then(function(response){
+              fetch('http://localhost:8085/dashboard/clear')
+              .then(function(response){
+                document.getElementById('info8080').click()
+                document.getElementById('info8084').click()
+                document.getElementById('info8085').click()
+              })
+            })
+          })
+        }
+      </clear>
+    </script>
+    <script src="static/riot.js"></script>
+    <script>
+      riot.mount('*')
+      document.getElementById('info8080').click()
+      document.getElementById('info8084').click()
+      document.getElementById('info8085').click()
+    </script>
+  </body>
+</html>

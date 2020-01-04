@@ -3,6 +3,7 @@ import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
@@ -70,7 +71,7 @@ public class Api {
 
             return HttpResponse.created(authRes);
         }catch(HttpClientResponseException e){
-            return HttpResponse.created(e.getResponse().getBody(AuthResponse.class).get());
+            return HttpResponse.created(e.getResponse().getBody(AuthResponse.class).get()).status(HttpStatus.UNAUTHORIZED);
         }
     }
 }

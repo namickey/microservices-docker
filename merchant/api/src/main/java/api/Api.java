@@ -4,6 +4,7 @@ import io.micronaut.context.annotation.Value;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
@@ -17,6 +18,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +60,7 @@ public class Api {
     public HttpResponse<AuthResponse> auth(@Body AuthRequest ar) {
         try{
             ar.setMerchantCode(merchantCode);
+            ar.setTime(LocalDateTime.now());
             HttpResponse<AuthResponse> res = psp.toBlocking().exchange(HttpRequest.POST("/auth", ar),
                     Argument.of(AuthResponse.class), Argument.of(AuthResponse.class));
 
@@ -66,7 +69,7 @@ public class Api {
 
             return HttpResponse.created(res.body());
         }catch(HttpClientResponseException e){
-            return HttpResponse.created(e.getResponse().getBody(AuthResponse.class).get());
+            return HttpResponse.created(e.getResponse().getBody(AuthResponse.class).get()).status(HttpStatus.UNAUTHORIZED);
         }
     }
 }

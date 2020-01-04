@@ -9,11 +9,9 @@ import java.time.LocalDateTime;
 public class Sales implements Serializable {
     private String companyCode;
     private LocalDateTime time;
-    private String authNum;
 
-    public Sales(AuthRequest req, AuthResponse res){
+    public Sales(AuthRequest req){
         this.companyCode = req.getCompanyCode();
         this.time = req.getTime();
-        this.authNum = res.getAuthNum();
     }
 }

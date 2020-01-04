@@ -3,3 +3,5 @@ micronaut:
     name: api
   server:
     port: 8082
+    cors:
+      enabled: true
