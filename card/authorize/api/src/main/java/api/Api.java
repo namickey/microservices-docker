@@ -14,9 +14,11 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.reactivex.Single;
 import org.redisson.Redisson;
+import org.redisson.api.MapOptions;
 import org.redisson.api.RList;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
 
 import javax.inject.Inject;
@@ -44,6 +46,26 @@ public class Api {
         return li;
     }
 
+    @Get("balance")
+    public String getBalance(){
+        RMap<String, Float> map = client.getMap("balance", StringCodec.INSTANCE);
+        return String.valueOf(map.get("1234-1234-1234-1234"));
+    }
+
+    @Get("add")
+    public String getAdd(){
+        RMap<String, Float> map = client.getMap("balance", StringCodec.INSTANCE);
+        map.addAndGet("1234-1234-1234-1234", 100f);
+        return String.valueOf(map.get("1234-1234-1234-1234"));
+    }
+
+    @Get("minus")
+    public String getMinus(){
+        RMap<String, Float> map = client.getMap("balance", StringCodec.INSTANCE);
+        map.addAndGet("1234-1234-1234-1234", -100f);
+        return String.valueOf(map.get("1234-1234-1234-1234"));
+    }
+
     @Get("clear")
     public String clear(){
         client.getList("authorize").clear();
@@ -53,9 +75,9 @@ public class Api {
     }
 
     private void resetBalance(){
-        RMap<String, Integer> map = client.getMap("balance");
+        RMap<String, Float> map = client.getMap("balance", StringCodec.INSTANCE);
         map.clear();
-        map.put("1234-1234-1234-1234", 600);
+        map.put("1234-1234-1234-1234", 600f);
     }
 
     @Post("auth")
@@ -64,11 +86,14 @@ public class Api {
         RList<Sales> list = client.getList("authorize");
         list.add(new Sales(ar));
 
-        RMap<String, Integer> map = client.getMap("balance");
-        Integer balance = map.addAndGet(ar.getPan(), ar.getPrice()*-1);
+        RMap<String, Float> map = client.getMap("balance", StringCodec.INSTANCE);
+        System.out.println(ar);
+        System.out.println(Float.valueOf(ar.getPrice()*-1));
+        Float balance = map.addAndGet(ar.getPan(), Float.valueOf(ar.getPrice()*-1));
+        System.out.println(balance);
         AuthResponse res = new AuthResponse();
         if (balance < 0) {
-            map.addAndGet(ar.getPan(), ar.getPrice());
+            //map.addAndGet(ar.getPan(), Float.valueOf(ar.getPrice()));
             res.setErrorCode("G55");
             return HttpResponse.created(res).status(HttpStatus.UNAUTHORIZED);
         }
